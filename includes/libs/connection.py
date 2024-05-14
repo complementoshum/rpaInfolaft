@@ -11,7 +11,6 @@ server = os.environ.get("SERVER")
 userDb = os.environ.get("USERDB")
 passwordDb = os.environ.get("PASSWORDDB")
 databaseApp = os.environ.get("DATABASEAPP")
-databaseCh = os.environ.get("DATABASECH")
 
 
 def conSqlAppWeb():
