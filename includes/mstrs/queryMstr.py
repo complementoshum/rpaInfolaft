@@ -49,7 +49,7 @@ def getSolicitud(row):
     query = (
         f"SELECT {os.environ.get('TOPSOL')} [id], [idBd],[idProceso],[idInfolaft],[nit],[usrRegistra],"
         f"[fechaHora],[rutaArchivo], [fechaFinalizacion], [estado] "
-        f"FROM T_GH_solicitudInfolaft WITH(NOLOCK) where estado = '{estado}' order by id asc"
+        f"FROM T_GH_solicitudInfolaft WITH(NOLOCK) where estado = '{estado}' and rutaArchivo IS NULL order by id asc"
     )
     conec = con.conSqlAppWeb()
     cursor = conec.cursor().execute(query)

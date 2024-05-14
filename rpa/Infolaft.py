@@ -31,7 +31,6 @@ def rpa(
     paramsCons,
     contNoti=0,
 ):
-    print("aca")
     nit = None
     rutaDescargas = None
     idSolicitud = None
@@ -132,6 +131,7 @@ def rpa(
                 waitBtnBusquedaAdmin.click()
 
             except Exception as e:
+                print(e)
                 driver.quit()
                 time.sleep(retryTime)
                 return rpa(
@@ -155,7 +155,7 @@ def rpa(
                     break
 
                 time.sleep(1)  # Espera antes de volver a verificar
-            print("s")
+
             resultE.update(
                 {
                     "urlResultado": rutaF,

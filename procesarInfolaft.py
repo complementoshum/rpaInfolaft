@@ -237,7 +237,6 @@ def procesarSolicitud(user):
                     for file in files:
                         if str(nombreLista + ".py") == (file.name):
                             auditoriaUPD = None
-                            print("aca")
                             # EJECUTA EL ARCHIVO PARA GENERAR EL PDF
                             procesPDF = procesarDocumento(
                                 envRutaFS,
