@@ -5,7 +5,6 @@ import concurrent.futures
 import asyncio
 
 from telegram import Bot
-from twocaptcha import TwoCaptcha
 from dotenv import load_dotenv
 
 from selenium.webdriver.common.by import By
@@ -21,7 +20,6 @@ import includes.mstrs.queryMstr as qMstr
 
 
 load_dotenv()  # Evitar sobrescribir variables
-envApiCaptcha = TwoCaptcha(os.environ.get("CAPTCHAKEY"))
 envEstadoV = os.environ.get("ESTADOVALIDANDO")
 envEstadoF = os.environ.get("ESTADOFINALIZADO")
 envAppRPA = os.environ.get("APPRPA")
@@ -135,10 +133,8 @@ def procesarDocumento(
         "contraseñaLogin": None,
         "msgNoResultado": None,
         "rutaDocumento": None,
-        "apiCaptcha": None,
         "reintentosEspera": None,
         "siteCaptchaKey": None,
-        "msgNoCaptcha": None,
     }
 
     resultE = {

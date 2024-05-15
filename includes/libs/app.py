@@ -94,60 +94,6 @@ def esperaCargaPagina(driver, url, campoBuscar, intentos=0):
         return False
 
 
-def captcha(driver, api, url, siteCaptchaKey):
-    resultCaptcha = None
-    codeCaptcha = None
-    urlCaptcha = None
-    try:
-        urlCaptcha = url
-        resultCaptcha = api.recaptcha(sitekey=siteCaptchaKey, url=urlCaptcha)
-        codeCaptcha = resultCaptcha["code"]
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "g-recaptcha-response"))
-        )
-        driver.execute_script(
-            "document.getElementById('g-recaptcha-response').innerHTML = "
-            + "'"
-            + codeCaptcha
-            + "'"
-        )
-        return True
-    except Exception as e:
-        print(e)
-        return False
-
-
-def normalCaptcha(driver, api, rutaS, fieldCaptcha, ubiCaptcha):
-    rutaCaptcha = None
-    captchaSolv = None
-    try:
-        rutaCaptcha = rutaS
-        time.sleep(1)
-        driver.find_element(By.XPATH, ubiCaptcha).screenshot(rutaCaptcha)
-        time.sleep(2)
-        captchaSolv = api.normal(rutaCaptcha)
-        driver.find_element(By.XPATH, fieldCaptcha).send_keys(captchaSolv["code"])
-        if os.path.exists(rutaCaptcha):
-            os.remove(rutaCaptcha)
-        time.sleep(3)
-        return True
-    except Exception as e:
-        print(e)
-        return False
-
-
-def balanceCaptcha(api):
-    balanceCaptchaCredits = None
-    creditoMinimo = None
-    balanceCaptchaCredits = str(api.balance())
-    creditoMinimo = str(os.environ.get("CREDITOSMINIMOS"))
-
-    if balanceCaptchaCredits >= creditoMinimo:
-        return True
-    else:
-        return False
-
-
 def eliminarArchivosExist(ruta):
     while os.path.exists(ruta):
         os.remove(ruta)
