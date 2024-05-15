@@ -242,7 +242,6 @@ def procesarSolicitud(user):
                                 glbRutaS,
                             )
 
-                            print(procesPDF)
                             infoLaftDocumento = procesPDF["urlResultado"]
 
                             if infoLaftDocumento:
