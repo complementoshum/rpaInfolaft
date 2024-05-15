@@ -158,7 +158,7 @@ def procesarDocumento(
             listUrl = listaRiesgo["urlLista"]
             listUserLogin = listaRiesgo["userLogin"]
             listPwdLogin = listaRiesgo["passwordLogin"]
-            rutaScr = f"{rutaFS}/{perNit}/{perIdSolicitud}/"
+            rutaScr = f"{rutaFS}/{perNit}/infolaft/{perIdSolicitud}/"
             retryTime = envRetryTime
             if not os.path.exists(rutaScr):
                 os.makedirs(rutaScr)
