@@ -11,7 +11,6 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from datetime import datetime
 
-import requests
 import threading
 
 import includes.mstrs.queryMstr as qMstr
