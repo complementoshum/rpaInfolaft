@@ -33,16 +33,6 @@ def getEstadoLista(row):
     return results
 
 
-def getTipoDocRPA():
-    query = "select * from T_G_tiposIdentificacion with(nolock)"
-    conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query)
-    columns = [column[0] for column in cursor.description]
-    results = []
-    for row in cursor.fetchall():
-        results.append(dict(zip(columns, row)))
-    return results
-
 
 def getSolicitud(row):
     estado = row["estado"]
