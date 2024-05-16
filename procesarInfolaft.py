@@ -209,7 +209,7 @@ def procesarSolicitud(user):
                 updSolicitud = updEstadoDocumento(
                     idSolicitud, usrRegistra, envEstadoV, envAppRPA, envModRPA
                 )
-
+    print(updSolicitud)
     if updSolicitud:
         try:
 
