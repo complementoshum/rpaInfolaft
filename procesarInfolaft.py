@@ -73,7 +73,6 @@ def updEstadoDocumento(idSolicitudP, usrRegistraP, estadoVal, audApp, audMod):
         "modName": None,
     }
     updDisponible = maxDocumentos()
-    print(updDisponible)
     if updDisponible:
         try:
             usrRegistra = usrRegistraP
@@ -88,7 +87,6 @@ def updEstadoDocumento(idSolicitudP, usrRegistraP, estadoVal, audApp, audMod):
                     "mensajeError": None,
                 }
             )
-            print(updEstadoV)
             updDocumento = qMstr.updEstadoDocs(updEstadoV)
             auditoria.update(
                 {
@@ -210,7 +208,6 @@ def procesarSolicitud(user):
                 updSolicitud = updEstadoDocumento(
                     idSolicitud, usrRegistra, envEstadoV, envAppRPA, envModRPA
                 )
-    print(updSolicitud)
     if updSolicitud:
         try:
 
