@@ -83,7 +83,6 @@ def rpa(
             app.eliminarArchivosExist(rutaF)
 
             try:
-                time.sleep(60)
                 waitInputUser = WebDriverWait(driver, 10).until(
                     EC.visibility_of_element_located((By.XPATH, inputUser))
                 )
