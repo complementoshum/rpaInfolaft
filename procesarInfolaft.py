@@ -158,7 +158,7 @@ def procesarDocumento(
             if not os.path.exists(rutaScr):
                 os.makedirs(rutaScr)
 
-            dicRuta.update({"rutaDoc": rutaScr + str(listId) + "_" + perNit + ".png"})
+            dicRuta.update({"rutaDoc": rutaScr + str(listId) + "_" + perNit + ".pdf"})
             varImportRPA = importlib.import_module(f"rpa.{listNombre}")
             print(f"{listNombre} - Solicitud {perIdSolicitud}")
 
