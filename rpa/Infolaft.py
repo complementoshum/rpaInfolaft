@@ -70,6 +70,7 @@ def rpa(
             urlF = paramsCons["urlLista"]
 
             paginaDisponible = app.esperaCargaPagina(driver, urlF, inputUser)
+            print("esta es la pagina, ", paginaDisponible)
             if not paginaDisponible:
                 print(f"Reintentando en Solicitud {idSolicitud} ")
                 driver.quit()
