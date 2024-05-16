@@ -160,7 +160,6 @@ def procesarDocumento(
 
             dicRuta.update({"rutaDoc": rutaScr + str(listId) + "_" + perNit + ".pdf"})
             varImportRPA = importlib.import_module(f"rpa.{listNombre}")
-            print(f"{listNombre} - Solicitud {perIdSolicitud}")
 
             rpaDatosDic.update(
                 {

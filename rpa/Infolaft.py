@@ -84,6 +84,7 @@ def rpa(
     idLista = paramsCons["idLista"]
     dicListaRiesgo.update({"idLista": idLista})
     driverDic.update({"rutaDescargas": rutaDescargas})
+    print("RPA INFOLAFT: ", idLista, "| | | |", idSolicitud)
     if app.listaActiva(dicListaRiesgo):
         try:
             nit = paramsCons["nit"]
