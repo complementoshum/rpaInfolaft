@@ -15,13 +15,39 @@ temp_profile_dir = tempfile.mkdtemp()
 inputdId = '//*[@id="input_20"]'
 inputUser = '//*[@id="input_2"]'
 inputdPWd = '//*[@id="input_3"]'
-btnIngresar = '/html/body/div[2]/div[2]/section/div/div/div[2]/div[1]/div/ng-include/div/div/div[1]/div/div[2]/a'
+btnIngresar = "/html/body/div[2]/div[2]/section/div/div/div[2]/div[1]/div/ng-include/div/div/div[1]/div/div[2]/a"
 btnReportes = '//*[@id="nav"]/li[3]/ul/li[1]/a/span'
 btnVerReporte = '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[1]/div/form/div/div[1]/div/div[3]/div/button[1]'
 btnAdministrar = '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[2]/div/md-table-container/table/tbody/tr/td[10]/md-menu/button/md-icon'
 btnAdminEntrar = "/html/body/div[5]/md-menu-content"
 btnBusquedaAdmin = "/html/body/div[2]/div/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[3]/div[2]/md-table-container/table/tbody/tr/td[5]/md-menu/button"
 btnBusquedaDescPDF = "/html/body/div[5]/md-menu-content/md-menu-item[2]/button"
+
+
+def login(driver, usuario, contraseña, intentos=0):
+    try:
+        waitInputUser = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, inputUser))
+        )
+        waitInputUser.send_keys(usuario)
+
+        waitInputPwd = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, inputdPWd))
+        )
+        waitInputPwd.send_keys(contraseña)
+
+        waitBtnIngresar = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, btnIngresar))
+        )
+        waitBtnIngresar.click()
+
+        return True
+
+    except Exception as e:
+        time.sleep(10)
+        if intentos < 6:
+            return login(driver, usuario, contraseña, intentos + 1)
+        return False
 
 
 def rpa(
@@ -83,20 +109,15 @@ def rpa(
             app.eliminarArchivosExist(rutaF)
 
             try:
-                waitInputUser = WebDriverWait(driver, 10).until(
-                    EC.visibility_of_element_located((By.XPATH, inputUser))
-                )
-                waitInputUser.send_keys(usuarioLog)
-
-                waitInputPwd = WebDriverWait(driver, 10).until(
-                    EC.visibility_of_element_located((By.XPATH, inputdPWd))
-                )
-                waitInputPwd.send_keys(passwordLog)
-                waitBtnIngresar = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, btnIngresar))
-                )
-                waitBtnIngresar.click()
-
+                if not login(driver, usuarioLog, passwordLog):
+                    print(f"Reintentando en Solicitud {idSolicitud} ")
+                    driver.quit()
+                    time.sleep(retryTime)
+                    return rpa(
+                        resultE,
+                        paramsCons,
+                        contNoti + 1,
+                    )
                 waitBtnReportes = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnReportes))
                 )
