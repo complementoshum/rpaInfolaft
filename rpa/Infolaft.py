@@ -84,7 +84,6 @@ def rpa(
     idLista = paramsCons["idLista"]
     dicListaRiesgo.update({"idLista": idLista})
     driverDic.update({"rutaDescargas": rutaDescargas})
-    print("RPA INFOLAFT: ", idLista, "| | | |", idSolicitud)
     if app.listaActiva(dicListaRiesgo):
         try:
             nit = paramsCons["nit"]
@@ -120,6 +119,7 @@ def rpa(
                         paramsCons,
                         contNoti + 1,
                     )
+
                 waitBtnReportes = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnReportes))
                 )
