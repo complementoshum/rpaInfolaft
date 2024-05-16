@@ -43,5 +43,7 @@ RUN wget -q --continue -P $CHROMEDRIVER_DIR http://chromedriver.storage.googleap
 # Poner Chromedriver en la RUTA
 ENV PATH $CHROMEDRIVER_DIR:$PATH
 
+RUN rm google-chrome-stable_114.0.5735.198-1_amd64.deb
+
 # Comandos para correr aplicacion
 CMD ["cron", "-f"]
