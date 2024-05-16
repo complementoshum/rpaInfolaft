@@ -40,7 +40,6 @@ bloqueoHilos = threading.Lock()
 
 
 def maxDocumentos():
-    print("prueba")
     cantidadF = None
     cantidadSol = None
     cantidadV = None
@@ -74,7 +73,7 @@ def updEstadoDocumento(idSolicitudP, usrRegistraP, estadoVal, audApp, audMod):
         "modName": None,
     }
     updDisponible = maxDocumentos()
-
+    print(updDisponible)
     if updDisponible:
         try:
             usrRegistra = usrRegistraP
@@ -89,6 +88,7 @@ def updEstadoDocumento(idSolicitudP, usrRegistraP, estadoVal, audApp, audMod):
                     "mensajeError": None,
                 }
             )
+            print(updEstadoV)
             updDocumento = qMstr.updEstadoDocs(updEstadoV)
             auditoria.update(
                 {
@@ -278,7 +278,6 @@ def ejecutarRPA():
     if DocumentoDispo:
         selectDocumentoP = {"estado": os.environ.get("ESTADOPENDIENTE")}
         userP = qMstr.getSolicitud(selectDocumentoP)
-        print(userP)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             randomTimeSleep = random.uniform(0, 5)
             time.sleep(randomTimeSleep)
