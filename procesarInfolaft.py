@@ -277,6 +277,7 @@ def ejecutarRPA():
     if DocumentoDispo:
         selectDocumentoP = {"estado": os.environ.get("ESTADOPENDIENTE")}
         userP = qMstr.getSolicitud(selectDocumentoP)
+        print(userP)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             randomTimeSleep = random.uniform(0, 5)
             time.sleep(randomTimeSleep)
