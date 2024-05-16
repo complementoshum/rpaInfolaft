@@ -41,7 +41,7 @@ def login(driver, usuario, contraseña, intentos=0):
             EC.element_to_be_clickable((By.XPATH, btnIngresar))
         )
         waitBtnIngresar.click()
-
+        print("despues de ingresar")
         return True
 
     except Exception as e:
@@ -120,6 +120,7 @@ def rpa(
                         paramsCons,
                         contNoti + 1,
                     )
+                print("reportes")
                 waitBtnReportes = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnReportes))
                 )
