@@ -70,7 +70,6 @@ def rpa(
             urlF = paramsCons["urlLista"]
 
             paginaDisponible = app.esperaCargaPagina(driver, urlF, btnIngresar)
-            print("esta es la pagina, ", paginaDisponible)
             if not paginaDisponible:
                 print(f"Reintentando en Solicitud {idSolicitud} ")
                 driver.quit()
@@ -150,7 +149,7 @@ def rpa(
                 if files:
                     latest_file = max(files, key=os.path.getctime)
                     new_path = rutaF  # Ruta de destino para mover el archivo
-                    os.rename(latest_file, os.path.join(new_path))
+                    shutil.move(latest_file, os.path.join(new_path))
                     break
 
                 time.sleep(1)  # Espera antes de volver a verificar
