@@ -81,7 +81,7 @@ def esperaCargaPagina(driver, url, campoBuscar, intentos=0):
         urlP = url
         driver.get(urlP)
         WebDriverWait(driver, timeWaitLoadPage).until(
-            EC.visibility_of_element_located((By.XPATH, campoBuscar))
+            EC.element_to_be_clickable((By.XPATH, campoBuscar))
         )
         return True
 
