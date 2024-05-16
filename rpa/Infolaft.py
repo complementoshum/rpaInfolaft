@@ -69,7 +69,7 @@ def rpa(
             driver.set_window_size(1600, 1080)
             urlF = paramsCons["urlLista"]
 
-            paginaDisponible = app.esperaCargaPagina(driver, urlF, inputUser)
+            paginaDisponible = app.esperaCargaPagina(driver, urlF, btnIngresar)
             print("esta es la pagina, ", paginaDisponible)
             if not paginaDisponible:
                 print(f"Reintentando en Solicitud {idSolicitud} ")
