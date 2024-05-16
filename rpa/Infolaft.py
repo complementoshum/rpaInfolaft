@@ -15,7 +15,7 @@ temp_profile_dir = tempfile.mkdtemp()
 inputdId = '//*[@id="input_20"]'
 inputUser = '//*[@id="input_2"]'
 inputdPWd = '//*[@id="input_3"]'
-btnIngresar = '//*[@id="content"]/section/div/div/div[2]/div[1]/div/ng-include/div/div/div[1]/div/div[2]/a'
+btnIngresar = '/html/body/div[2]/div[2]/section/div/div/div[2]/div[1]/div/ng-include/div/div/div[1]/div/div[2]/a'
 btnReportes = '//*[@id="nav"]/li[3]/ul/li[1]/a/span'
 btnVerReporte = '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[1]/div/form/div/div[1]/div/div[3]/div/button[1]'
 btnAdministrar = '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[2]/div/md-table-container/table/tbody/tr/td[10]/md-menu/button/md-icon'
@@ -87,13 +87,12 @@ def rpa(
                     EC.presence_of_element_located((By.XPATH, inputUser))
                 )
                 waitInputUser.send_keys(usuarioLog)
-                print("usuario")
+
                 waitInputPwd = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, inputdPWd))
                 )
                 waitInputPwd.send_keys(passwordLog)
-                print("contraseña")
-
+                driver.save_screenshot(rutaF)
                 waitBtnIngresar = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnIngresar))
                 )
