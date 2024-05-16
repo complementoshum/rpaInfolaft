@@ -26,6 +26,7 @@ btnBusquedaDescPDF = "/html/body/div[5]/md-menu-content/md-menu-item[2]/button"
 
 def login(driver, usuario, contraseña, intentos=0):
     try:
+        print("entro login")
         waitInputUser = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, inputUser))
         )
@@ -149,7 +150,7 @@ def rpa(
                 waitBtnBusquedaAdmin.click()
 
             except Exception as e:
-                print(e)
+                print(repr(e))
                 driver.quit()
                 time.sleep(retryTime)
                 return rpa(
