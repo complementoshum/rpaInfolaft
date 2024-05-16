@@ -29,7 +29,6 @@ def rpa(
     paramsCons,
     contNoti=0,
 ):
-    print("pruebas")
     nit = None
     rutaDescargas = None
     idSolicitud = None
@@ -67,7 +66,6 @@ def rpa(
             idConsecutivo = paramsCons["idConsecutivo"]
             retryTime = paramsCons["reintentosEspera"]
             driver = app.driverRPA(driverDic)
-            print(driver)
             driver.set_window_size(1600, 1080)
             urlF = paramsCons["urlLista"]
 
@@ -99,36 +97,41 @@ def rpa(
                     EC.element_to_be_clickable((By.XPATH, btnIngresar))
                 )
                 waitBtnIngresar.click()
-
+                print("login")
                 waitBtnReportes = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnReportes))
                 )
                 waitBtnReportes.click()
-
+                print("reportes")
                 waitInputId = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, inputdId))
                 )
                 waitInputId.send_keys(idConsecutivo)
+                print("consecutivo")
 
                 waitBtnVerReporte = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnVerReporte))
                 )
                 waitBtnVerReporte.click()
+                print("ver reporte")
 
                 waitBtnAdministrar = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnAdministrar))
                 )
                 waitBtnAdministrar.click()
+                print("administrar")
 
                 waitBtnAdminEntrar = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, btnAdminEntrar))
                 )
                 waitBtnAdminEntrar.click()
+                print("admin entrar")
 
                 waitBtnBusquedaAdmin = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, btnBusquedaAdmin))
                 )
                 waitBtnBusquedaAdmin.click()
+                print("busqueda admin")
 
             except Exception as e:
                 print(e)
