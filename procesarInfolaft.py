@@ -40,6 +40,7 @@ bloqueoHilos = threading.Lock()
 
 
 def maxDocumentos():
+    print("prueba")
     cantidadF = None
     cantidadSol = None
     cantidadV = None
