@@ -258,13 +258,17 @@ def procesarSolicitud(user):
                     await enviar_mensaje(token, chat_id, mensajeError)
 
                 asyncio.run(main())
-    updEstadoFE = None
-    updEstadoFE = {
-        "estado": envEstadoF,
-        "idSolicitud": idSolicitud,
-        "mensajeError": mensajeError,
-    }
-    qMstr.updEstadoSolicitudFinalizada(updEstadoFE)
+
+        updEstadoFE = None
+        updEstadoFE = {
+            "estado": envEstadoF,
+            "idSolicitud": idSolicitud,
+            "mensajeError": mensajeError,
+        }
+        qMstr.updEstadoSolicitudFinalizada(updEstadoFE)
+        print(
+                f"---------------Finaliza RPA PDF Infolaft Solicitud {idSolicitud}--------------"
+            )
 
 def ejecutarRPA():
     randomTimeSleep = None
