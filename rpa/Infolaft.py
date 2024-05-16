@@ -67,6 +67,7 @@ def rpa(
             idConsecutivo = paramsCons["idConsecutivo"]
             retryTime = paramsCons["reintentosEspera"]
             driver = app.driverRPA(driverDic)
+            print(driver)
             driver.set_window_size(1600, 1080)
             urlF = paramsCons["urlLista"]
 
