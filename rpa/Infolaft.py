@@ -26,22 +26,21 @@ btnBusquedaDescPDF = "/html/body/div[5]/md-menu-content/md-menu-item[2]/button"
 
 def login(driver, usuario, contraseña, intentos=0):
     try:
-        print("entro login")
         waitInputUser = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, inputUser))
         )
+        waitInputUser.clear()
         waitInputUser.send_keys(usuario)
 
         waitInputPwd = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, inputdPWd))
         )
+        waitInputPwd.clear()
         waitInputPwd.send_keys(contraseña)
-        print("antes de ingresar")
         waitBtnIngresar = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, btnIngresar))
         )
         waitBtnIngresar.click()
-        print("despues de ingresar")
         return True
 
     except Exception as e:
@@ -120,30 +119,26 @@ def rpa(
                         paramsCons,
                         contNoti + 1,
                     )
-                print("reportes")
                 waitBtnReportes = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnReportes))
                 )
                 waitBtnReportes.click()
 
-                print("reportes")
                 waitInputId = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, inputdId))
                 )
+                waitInputId.clear()
                 waitInputId.send_keys(idConsecutivo)
-                print("consecutivo")
 
                 waitBtnVerReporte = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnVerReporte))
                 )
                 waitBtnVerReporte.click()
-                print("ver repote")
 
                 waitBtnAdministrar = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, btnAdministrar))
                 )
                 waitBtnAdministrar.click()
-                print("reportes")
 
                 waitBtnAdminEntrar = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, btnAdminEntrar))
