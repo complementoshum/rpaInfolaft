@@ -36,7 +36,7 @@ def login(driver, usuario, contraseña, intentos=0):
             EC.visibility_of_element_located((By.XPATH, inputdPWd))
         )
         waitInputPwd.send_keys(contraseña)
-
+        print("antes de ingresar")
         waitBtnIngresar = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, btnIngresar))
         )
@@ -45,6 +45,7 @@ def login(driver, usuario, contraseña, intentos=0):
         return True
 
     except Exception as e:
+        print("error login, intento: ", intentos, " | ", repr(e))
         time.sleep(10)
         if intentos < 6:
             return login(driver, usuario, contraseña, intentos + 1)
