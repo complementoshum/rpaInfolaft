@@ -84,12 +84,12 @@ def rpa(
 
             try:
                 waitInputUser = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, inputUser))
+                    EC.visibility_of_element_located((By.XPATH, inputUser))
                 )
                 waitInputUser.send_keys(usuarioLog)
                 driver.save_screenshot(rutaF)
                 waitInputPwd = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, inputdPWd))
+                    EC.visibility_of_element_located((By.XPATH, inputdPWd))
                 )
                 waitInputPwd.send_keys(passwordLog)
                 waitBtnIngresar = WebDriverWait(driver, 10).until(
