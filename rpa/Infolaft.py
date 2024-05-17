@@ -60,6 +60,7 @@ def rpa(
     paramsCons,
     contNoti=0,
 ):
+    intentosPDF = 0
     nit = None
     rutaDescargas = None
     idSolicitud = None
@@ -184,7 +185,7 @@ def rpa(
             )
             waitBtnBusquedaDescPDF.click()
 
-            while True:
+            while True and intentosPDF < 10:
                 # Buscar archivos que contengan la parte específica del nit en la carpeta
                 files = glob.glob(os.path.join(rutaDescargas, f"*{nit}*"))
                 if files:
@@ -193,7 +194,23 @@ def rpa(
                     shutil.move(latest_file, os.path.join(new_path))
                     break
 
-                time.sleep(1)  # Espera antes de volver a verificar
+                intentosPDF += 1
+                time.sleep(5)  # Espera antes de volver a verificar
+                if intentosPDF > 10:
+                    print(
+                        f"Reintentando solicitud {idSolicitud} intento {contNoti + 1} Error: ",
+                        repr(e),
+                    )
+                    try:
+                        driver.quit()
+                    except Exception as e:
+                        pass
+                    time.sleep(retryTime)
+                    return rpa(
+                        resultE,
+                        paramsCons,
+                        contNoti + 1,
+                    )
 
             resultE.update(
                 {
