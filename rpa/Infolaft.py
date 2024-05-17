@@ -190,8 +190,7 @@ def rpa(
                 files = glob.glob(os.path.join(rutaDescargas, f"*{nit}*"))
                 if files:
                     latest_file = max(files, key=os.path.getctime)
-                    new_path = rutaF  # Ruta de destino para mover el archivo
-                    shutil.move(latest_file, os.path.join(new_path))
+                    shutil.move(latest_file, os.path.join(rutaF))
                     break
 
                 intentosPDF += 1
