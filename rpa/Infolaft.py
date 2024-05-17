@@ -25,6 +25,9 @@ btnBusquedaDescPDF = "/html/body/div[5]/md-menu-content/md-menu-item[2]/button"
 
 
 def login(driver, usuario, contraseña, intentos=0):
+    waitInputPwd = None
+    waitInputUser = None
+    waitBtnIngresar = None
     try:
         waitInputUser = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, inputUser))
@@ -48,6 +51,7 @@ def login(driver, usuario, contraseña, intentos=0):
         time.sleep(10)
         if intentos < 6:
             return login(driver, usuario, contraseña, intentos + 1)
+
         return False
 
 
@@ -60,17 +64,13 @@ def rpa(
     rutaDescargas = None
     idSolicitud = None
     waitInputId = None
-    waitInputPwd = None
-    waitInputUser = None
     waitBtnAdminEntrar = None
     waitBtnAdministrar = None
     waitBtnBusquedaAdmin = None
-    waitBtnIngresar = None
     waitBtnReportes = None
     waitBtnVerReporte = None
     driver = None
     urlF = None
-    download = None
     usuarioLog = None
     retryTime = None
     passwordLog = None
@@ -98,8 +98,14 @@ def rpa(
 
             paginaDisponible = app.esperaCargaPagina(driver, urlF, btnIngresar)
             if not paginaDisponible:
-                print(f"Reintentando en Solicitud {idSolicitud} ")
-                driver.quit()
+                print(
+                    f"Reintentando solicitud {idSolicitud} intento {contNoti + 1} Error: ",
+                    repr(e),
+                )
+                try:
+                    driver.quit()
+                except Exception as e:
+                    pass
                 time.sleep(retryTime)
                 return rpa(
                     resultE,
@@ -111,8 +117,14 @@ def rpa(
 
             try:
                 if not login(driver, usuarioLog, passwordLog):
-                    print(f"Reintentando en Solicitud {idSolicitud} ")
-                    driver.quit()
+                    print(
+                        f"Reintentando solicitud {idSolicitud} intento {contNoti + 1} Error: ",
+                        repr(e),
+                    )
+                    try:
+                        driver.quit()
+                    except Exception as e:
+                        pass
                     time.sleep(retryTime)
                     return rpa(
                         resultE,
@@ -152,8 +164,14 @@ def rpa(
                 waitBtnBusquedaAdmin.click()
 
             except Exception as e:
-                print(repr(e))
-                driver.quit()
+                print(
+                    f"Reintentando solicitud {idSolicitud} intento {contNoti + 1} Error: ",
+                    repr(e),
+                )
+                try:
+                    driver.quit()
+                except Exception as e:
+                    pass
                 time.sleep(retryTime)
                 return rpa(
                     resultE,
@@ -183,12 +201,22 @@ def rpa(
                 }
             )
 
-            try:
-                driver.quit()
-            except:
-                pass
-
-            return resultE
+            driver.quit()
 
         except Exception as e:
-            print(repr(e))
+            print(
+                f"Reintentando solicitud {idSolicitud} intento {contNoti + 1} Error: ",
+                repr(e),
+            )
+            try:
+                driver.quit()
+            except Exception as e:
+                pass
+            time.sleep(retryTime)
+            return rpa(
+                resultE,
+                paramsCons,
+                contNoti + 1,
+            )
+
+    return resultE

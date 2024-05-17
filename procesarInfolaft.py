@@ -38,7 +38,6 @@ sem = threading.Semaphore(int(os.environ.get("CANTIDADMAXSOL")))
 bloqueoHilos = threading.Lock()
 
 
-
 def maxDocumentos():
     cantidadF = None
     cantidadSol = None
@@ -51,7 +50,6 @@ def maxDocumentos():
 
     else:
         return False
-
 
 
 def updEstadoDocumento(idSolicitudP, usrRegistraP, estadoVal, audApp, audMod):
@@ -147,7 +145,7 @@ def procesarDocumento(
         with bloqueoHilos:
             perNit = user["nit"]
             perIdSolicitud = user["id"]
-            idConsecutivoP = user['idInfolaft']
+            idConsecutivoP = user["idInfolaft"]
             listId = listaRiesgo["idLista"]
             listNombre = listaRiesgo["nombre"]
             listUrl = listaRiesgo["urlLista"]
@@ -177,9 +175,7 @@ def procesarDocumento(
                 }
             )
         resultE.update({"idSolicitud": perIdSolicitud, "idLista": listId})
-        estudioS = varImportRPA.rpa(
-            resultE, rpaDatosDic
-        )
+        estudioS = varImportRPA.rpa(resultE, rpaDatosDic)
         return estudioS
 
     except Exception as e:
@@ -197,8 +193,6 @@ def procesarSolicitud(user):
 
     idSolicitud = user["id"]
     usrRegistra = user["usrRegistra"]
-
-
 
     documentoDispo = maxDocumentos()
     if documentoDispo:
@@ -264,10 +258,12 @@ def procesarSolicitud(user):
             "idSolicitud": idSolicitud,
             "mensajeError": mensajeError,
         }
+
         qMstr.updEstadoSolicitudFinalizada(updEstadoFE)
         print(
-                f"---------------Finaliza RPA PDF Infolaft Solicitud {idSolicitud}--------------"
-            )
+            f"---------------Finaliza RPA PDF Infolaft Solicitud {idSolicitud}--------------"
+        )
+
 
 def ejecutarRPA():
     randomTimeSleep = None
