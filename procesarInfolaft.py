@@ -120,6 +120,8 @@ def procesarDocumento(
     idConsecutivoP = None
     retryTime = None
     varImportRPA = None
+    idBd = None
+    bdName = None
     rpaDatosDic = {
         "nit": None,
         "idSolicitud": None,
@@ -140,18 +142,23 @@ def procesarDocumento(
         "urlResultado": None,
     }
 
+    paramsBd = {'idBd': None }
+
     estudioS = resultE
     try:
         with bloqueoHilos:
             perNit = user["nit"]
             perIdSolicitud = user["id"]
             idConsecutivoP = user["idInfolaft"]
+            idBd = user['idBd']
             listId = listaRiesgo["idLista"]
             listNombre = listaRiesgo["nombre"]
             listUrl = listaRiesgo["urlLista"]
             listUserLogin = listaRiesgo["userLogin"]
             listPwdLogin = listaRiesgo["passwordLogin"]
-            rutaScr = f"{rutaFS}/{perNit}/infolaft/{perIdSolicitud}/"
+            paramsBd.update({'idBd': idBd})
+            bdName = qMstr.getConecInfo(paramsBd)
+            rutaScr = f"{rutaFS}/{bdName['bd']}/infolaft/{perNit}/{perIdSolicitud}/"
             retryTime = envRetryTime
             if not os.path.exists(rutaScr):
                 os.makedirs(rutaScr)

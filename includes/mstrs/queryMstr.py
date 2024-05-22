@@ -95,3 +95,14 @@ def updEstadoSolicitudFinalizada(row):
         cursor.rowcount,
         f"row(s) affected, se actualizo el estado del documento {row['idSolicitud']}.",
     )
+
+def getConecInfo(params):
+    params = params['idBd']
+    query = "SELECT idBd, bd, srv FROM T_G_appDatabases WITH(NOLOCK) WHERE idBd = ?"
+    conec = con.conSqlAppWeb()
+    cursor = conec.cursor().execute(query, params)
+    columns = [column[0] for column in cursor.description]
+    results = []
+    for row in cursor.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results[0]
