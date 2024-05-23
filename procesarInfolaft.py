@@ -240,10 +240,12 @@ def procesarSolicitud(user):
                                 glbRutaS,
                             )
 
-                            infoLaftDocumento = procesPDF["urlResultado"]
+                            with sem:
+                                with bloqueoHilos:
+                                    infoLaftDocumento = procesPDF["urlResultado"]
 
-                            if infoLaftDocumento:
-                                qMstr.insertResultado(procesPDF)
+                                    if infoLaftDocumento:
+                                        qMstr.insertResultado(procesPDF)
         except Exception as e:
             mensajeError = msgTelegram + repr(e)
             for idChat in chatIds:
