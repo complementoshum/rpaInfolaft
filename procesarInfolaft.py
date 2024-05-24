@@ -109,6 +109,7 @@ def procesarDocumento(
     retryTime,
     dicRuta,
 ):
+    infoLaft = None
     perIdSolicitud = None
     perNit = None
     listId = None
@@ -144,7 +145,7 @@ def procesarDocumento(
 
     paramsBd = {'idBd': None }
 
-    estudioS = resultE
+    infoLaftReturn = resultE
     try:
         with bloqueoHilos:
             perNit = user["nit"]
@@ -165,7 +166,6 @@ def procesarDocumento(
 
             dicRuta.update({"rutaDoc": rutaScr + str(listId) + "_" + perNit + ".pdf"})
             varImportRPA = importlib.import_module(f"rpa.{listNombre}")
-
             rpaDatosDic.update(
                 {
                     "nit": perNit,
@@ -182,11 +182,12 @@ def procesarDocumento(
                 }
             )
         resultE.update({"idSolicitud": perIdSolicitud, "idLista": listId})
-        estudioS = varImportRPA.rpa(resultE, rpaDatosDic)
-        return estudioS
+        infoLaft = varImportRPA.WebAutomation(rpaDatosDic)
+        infoLaftReturn = infoLaft.run_rpa(resultE)
+        return infoLaftReturn
 
     except Exception as e:
-        return estudioS
+        return infoLaftReturn
 
 
 def procesarSolicitud(user):
