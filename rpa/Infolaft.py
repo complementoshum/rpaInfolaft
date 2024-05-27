@@ -11,48 +11,49 @@ import includes.libs.app as app
 
 # Constants
 XPATHS = {
-    "input_id": '//*[@id="input_20"]',
-    "input_user": '//*[@id="input_2"]',
-    "input_pwd": '//*[@id="input_3"]',
-    "btn_ingresar": "/html/body/div[2]/div[2]/section/div/div/div[2]/div[1]/div/ng-include/div/div/div[1]/div/div[2]/a",
-    "btn_reportes": '//*[@id="nav"]/li[3]/ul/li[1]/a/span',
-    "btn_ver_reporte": '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[1]/div/form/div/div[1]/div/div[3]/div/button[1]',
-    "btn_administrar": '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[2]/div/md-table-container/table/tbody/tr/td[10]/md-menu/button/md-icon',
-    "btn_admin_entrar": "/html/body/div[5]/md-menu-content",
-    "btn_busqueda_admin": "/html/body/div[2]/div/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[3]/div[2]/md-table-container/table/tbody/tr/td[5]/md-menu/button",
-    "btn_busqueda_desc_pdf": "/html/body/div[5]/md-menu-content/md-menu-item[2]/button",
+    "inputId": '//*[@id="input_20"]',
+    "inputUser": '//*[@id="input_2"]',
+    "inputPwd": '//*[@id="input_3"]',
+    "btnIngresar": "/html/body/div[2]/div[2]/section/div/div/div[2]/div[1]/div/ng-include/div/div/div[1]/div/div[2]/a",
+    "btnReportes": '//*[@id="nav"]/li[3]/ul/li[1]/a/span',
+    "btnVerReporte": '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[1]/div/form/div/div[1]/div/div[3]/div/button[1]',
+    "btnAdministrar": '//*[@id="content"]/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[2]/div/md-table-container/table/tbody/tr/td[10]/md-menu/button/md-icon',
+    "btnAdminEntrar": "/html/body/div[5]/md-menu-content",
+    "btnBusquedaAdmin": "/html/body/div[2]/div/section/standard-view/section/div/div/section/div[2]/ng-transclude/div/div[3]/div[2]/md-table-container/table/tbody/tr/td[5]/md-menu/button",
+    "btnBusquedaDescPDF": "/html/body/div[5]/md-menu-content/md-menu-item[2]/button",
 }
 
+
 class WebAutomation:
-    def __init__(self, params_cons):
-        self.params_cons = params_cons
+    def __init__(self, paramsCons):
+        self.paramsCons = paramsCons
         self.driver = None
         self.temp_profile_dir = tempfile.mkdtemp()
-        self.setup_driver()
+        self.setupDriver()
 
-    def setup_driver(self):
-        driver_dic = {"loadStgy": "", "rutaDescargas": self.params_cons["rutaDescargas"]}
-        self.driver = app.driverRPA(driver_dic)
+    def setupDriver(self):
+        driverDic = {"loadStgy": "", "rutaDescargas": self.paramsCons["rutaDescargas"]}
+        self.driver = app.driverRPA(driverDic)
         self.driver.set_window_size(1600, 1080)
 
     def login(self, usuario, contraseña, intentos=0):
         try:
-            wait_input_user = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, XPATHS["input_user"]))
+            waitInputUser = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.XPATH, XPATHS["inputUser"]))
             )
-            wait_input_user.clear()
-            wait_input_user.send_keys(usuario)
+            waitInputUser.clear()
+            waitInputUser.send_keys(usuario)
 
-            wait_input_pwd = WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, XPATHS["input_pwd"]))
+            waitInputPwd = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.XPATH, XPATHS["inputPwd"]))
             )
-            wait_input_pwd.clear()
-            wait_input_pwd.send_keys(contraseña)
+            waitInputPwd.clear()
+            waitInputPwd.send_keys(contraseña)
 
-            wait_btn_ingresar = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, XPATHS["btn_ingresar"]))
+            waitBtnIngresar = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, XPATHS["btnIngresar"]))
             )
-            wait_btn_ingresar.click()
+            waitBtnIngresar.click()
             return True
 
         except Exception as e:
@@ -62,86 +63,114 @@ class WebAutomation:
                 return self.login(usuario, contraseña, intentos + 1)
             return False
 
-    def navigate_to_report(self, id_consecutivo):
-        wait_btn_reportes = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, XPATHS["btn_reportes"]))
+    def menuReport(self, idConsecutivo):
+        waitBtnReportes = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, XPATHS["btnReportes"]))
         )
-        wait_btn_reportes.click()
+        waitBtnReportes.click()
 
-        wait_input_id = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, XPATHS["input_id"]))
+        waitInputId = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, XPATHS["inputId"]))
         )
-        wait_input_id.clear()
-        wait_input_id.send_keys(id_consecutivo)
+        waitInputId.clear()
+        waitInputId.send_keys(idConsecutivo)
 
-        wait_btn_ver_reporte = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, XPATHS["btn_ver_reporte"]))
+        waitBtnVerReporte = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, XPATHS["btnVerReporte"]))
         )
-        wait_btn_ver_reporte.click()
+        waitBtnVerReporte.click()
 
-        wait_btn_administrar = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, XPATHS["btn_administrar"]))
+        waitBtnAdministrar = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, XPATHS["btnAdministrar"]))
         )
-        wait_btn_administrar.click()
+        waitBtnAdministrar.click()
 
-        wait_btn_admin_entrar = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, XPATHS["btn_admin_entrar"]))
+        waitBtnAdminEntrar = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, XPATHS["btnAdminEntrar"]))
         )
-        wait_btn_admin_entrar.click()
+        waitBtnAdminEntrar.click()
 
-        wait_btn_busqueda_admin = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, XPATHS["btn_busqueda_admin"]))
+        waitBtnBusquedaAdmin = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, XPATHS["btnBusquedaAdmin"]))
         )
-        wait_btn_busqueda_admin.click()
+        waitBtnBusquedaAdmin.click()
 
-        wait_btn_busqueda_desc_pdf = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, XPATHS["btn_busqueda_desc_pdf"]))
+        waitBtnBusquedaDescPDF = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, XPATHS["btnBusquedaDescPDF"]))
         )
-        wait_btn_busqueda_desc_pdf.click()
+        waitBtnBusquedaDescPDF.click()
 
-    def move_downloaded_file(self, ruta_descargas, ruta_f, nit, intentos_pdf):
-        while intentos_pdf < 10:
-            files = glob.glob(os.path.join(ruta_descargas, f"*{nit}*"))
+    def moveFile(self, rutaDescargas, rutaF, nit, intentosPDF):
+        while intentosPDF < 10:
+            files = glob.glob(os.path.join(rutaDescargas, f"*{nit}*"))
             if files:
-                latest_file = max(files, key=os.path.getctime)
-                shutil.move(latest_file, os.path.join(ruta_f))
+                latestFile = max(files, key=os.path.getctime)
+                shutil.move(latestFile, os.path.join(rutaF))
                 return True
-            intentos_pdf += 1
+            intentosPDF += 1
             time.sleep(5)
         return False
 
-    def handle_exceptions(self, e, resultE, cont_noti, retry_time):
-        print(f"Reintentando solicitud {self.params_cons['idSolicitud']} intento {cont_noti + 1} Error: {repr(e)}")
+    def reiniciarRPA(self, e, resultE, contNoti, retryTime):
+        print(
+            f"Reintentando solicitud {self.paramsCons['idSolicitud']} intento {contNoti + 1} Error: {repr(e)}"
+        )
         try:
             self.driver.quit()
         except Exception:
             pass
-        time.sleep(retry_time)
-        return self.run_rpa(resultE, cont_noti + 1)
+        time.sleep(retryTime)
+        self.setupDriver()  # Reiniciar el driver
+        return self.rpa(resultE, contNoti + 1)
 
-    def run_rpa(self, resultE, cont_noti=0):
-        intentos_pdf = 0
-        if app.listaActiva({"idLista": self.params_cons["idLista"]}):
+    def rpa(self, resultE, contNoti=0):
+        intentosPDF = 0
+        if app.listaActiva({"idLista": self.paramsCons["idLista"]}):
             try:
-                pagina_disponible = app.esperaCargaPagina(self.driver, self.params_cons["urlLista"], XPATHS["btn_ingresar"])
+                paginaDisponible = app.esperaCargaPagina(
+                    self.driver, self.paramsCons["urlLista"], XPATHS["btnIngresar"]
+                )
 
-                if not pagina_disponible:
-                    return self.handle_exceptions(Exception("Página no disponible"), resultE, cont_noti, self.params_cons["reintentosEspera"])
+                if not paginaDisponible:
+                    return self.reiniciarRPA(
+                        Exception("Página no disponible"),
+                        resultE,
+                        contNoti,
+                        self.paramsCons["reintentosEspera"],
+                    )
 
-                app.eliminarArchivosExist(self.params_cons["rutaDocumento"])
+                app.removeFileIfExist(self.paramsCons["rutaDocumento"])
 
-                if not self.login(self.params_cons["usuarioLogin"], self.params_cons["contraseñaLogin"]):
-                    return self.handle_exceptions(Exception("Login fallido"), resultE, cont_noti, self.params_cons["reintentosEspera"])
+                if not self.login(
+                    self.paramsCons["usuarioLogin"], self.paramsCons["contraseñaLogin"]
+                ):
+                    return self.reiniciarRPA(
+                        Exception("Login fallido"),
+                        resultE,
+                        contNoti,
+                        self.paramsCons["reintentosEspera"],
+                    )
 
-                self.navigate_to_report(self.params_cons["idConsecutivo"])
+                self.menuReport(self.paramsCons["idConsecutivo"])
 
-                if self.move_downloaded_file(self.params_cons["rutaDescargas"], self.params_cons["rutaDocumento"], self.params_cons["nit"], intentos_pdf):
-                    resultE.update({"urlResultado": self.params_cons["rutaDocumento"]})
+                if self.moveFile(
+                    self.paramsCons["rutaDescargas"],
+                    self.paramsCons["rutaDocumento"],
+                    self.paramsCons["nit"],
+                    intentosPDF,
+                ):
+                    resultE.update({"urlResultado": self.paramsCons["rutaDocumento"]})
                 else:
-                    return self.handle_exceptions(Exception("Descarga de PDF fallida"), resultE, cont_noti, self.params_cons["reintentosEspera"])
+                    return self.reiniciarRPA(
+                        Exception("Descarga de PDF fallida"),
+                        resultE,
+                        contNoti,
+                        self.paramsCons["reintentosEspera"],
+                    )
 
                 self.driver.quit()
             except Exception as e:
-                return self.handle_exceptions(e, resultE, cont_noti, self.params_cons["reintentosEspera"])
+                return self.reiniciarRPA(
+                    e, resultE, contNoti, self.paramsCons["reintentosEspera"]
+                )
         return resultE
-

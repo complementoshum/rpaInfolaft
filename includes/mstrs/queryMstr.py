@@ -1,108 +1,129 @@
 import os
-
 from dotenv import load_dotenv
-
 import includes.libs.connection as con
+import logging
 
-load_dotenv()  # Evitar sobrescribir variables
+load_dotenv()  # Cargar variables de entorno
+
+
+def execute_query(query, params=None):
+    conec = con.conSqlAppWeb()
+    cursor = conec.cursor()
+    try:
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+        columns = [column[0] for column in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return results
+    except Exception as e:
+        logging.error(f"Error ejecutando la consulta: {e}")
+        return None
+    finally:
+        cursor.close()
+        conec.close()
 
 
 def getListaT():
-    query = (
-        f"select [idLista],[nombre],[urlLista],[descripcion],[fechaHora],[estado],[usrRegistra],[fechaUltUpd],"
-        f"[esListaRiesgo],[userLogin],[passwordLogin],[msgNoResultado],[msgNoCaptcha],[siteCaptchaKey] "
-        f"from T_RPA_ListasRiesgo with(nolock) where esListaRiesgo = '{os.environ.get('LISTAINFOLAFT')}'"
-    )
-    conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query)
-    columns = [column[0] for column in cursor.description]
-    results = []
-    for row in cursor.fetchall():
-        results.append(dict(zip(columns, row)))
-    return results
+    query = f"""
+        SELECT [idLista],[nombre],[urlLista],[descripcion],[fechaHora],[estado],[usrRegistra],[fechaUltUpd],
+        [esListaRiesgo],[userLogin],[passwordLogin],[msgNoResultado],[msgNoCaptcha],[siteCaptchaKey]
+        FROM T_RPA_ListasRiesgo WITH(NOLOCK) WHERE esListaRiesgo = ?
+        """
+    params = (os.environ.get("LISTAINFOLAFT"),)
+    return execute_query(query, params)
 
 
 def getEstadoLista(row):
-    query = f"select estado from T_RPA_ListasRiesgo with(nolock) where idLista = {row['idLista']}"
-    conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query)
-    columns = [column[0] for column in cursor.description]
-    results = []
-    for row in cursor.fetchall():
-        results.append(dict(zip(columns, row)))
-    return results
-
+    query = f"""SELECT estado FROM T_RPA_ListasRiesgo WITH(NOLOCK) WHERE idLista = ? """
+    params = (row["idLista"],)
+    return execute_query(query, params)
 
 
 def getSolicitud(row):
-    estado = row["estado"]
-    query = (
-        f"SELECT {os.environ.get('TOPSOL')} [id], [idBd],[idProceso],[idInfolaft],[nit],[usrRegistra],"
-        f"[fechaHora],[rutaArchivo], [fechaFinalizacion], [estado] "
-        f"FROM T_GH_solicitudInfolaft WITH(NOLOCK) where estado = '{estado}' and rutaArchivo IS NULL order by id asc"
-    )
-    conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query)
-    columns = [column[0] for column in cursor.description]
-    results = []
-    for row in cursor.fetchall():
-        results.append(dict(zip(columns, row)))
-    return results
+    query = f"""
+        SELECT {os.environ.get('TOPSOL')} [id], [idBd],[idProceso],[idInfolaft],[nit],[usrRegistra],
+        [fechaHora],[rutaArchivo], [fechaFinalizacion], [estado]
+        FROM T_GH_solicitudInfolaft WITH(NOLOCK) WHERE estado = ? AND rutaArchivo IS NULL ORDER BY id ASC
+        """
+    params = (row["estado"],)
+    return execute_query(query, params)
 
 
 def getSolicitudesV():
-    query = f"select count(idInfolaft) cantidad from T_GH_solicitudInfolaft WITH(NOLOCK) WHERE estado = '{os.environ.get('ESTADOVALIDANDO')}'"
-    conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query)
-    columns = [column[0] for column in cursor.description]
-    results = []
-    for row in cursor.fetchall():
-        results.append(dict(zip(columns, row)))
-    return results
+    query = f"""
+        SELECT COUNT(idInfolaft) AS cantidad
+        FROM T_GH_solicitudInfolaft WITH(NOLOCK) WHERE estado = ?
+    """
+    params = (os.environ.get("ESTADOVALIDANDO"),)
+    return execute_query(query, params)
 
 
 def insertResultado(row):
+    query = f"""UPDATE T_GH_solicitudInfolaft SET rutaArchivo = ? WHERE id = ? """
     params = (row["urlResultado"], row["idSolicitud"])
-    query = "UPDATE T_GH_solicitudInfolaft SET rutaArchivo = ? WHERE id = ?"
     conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query, params)
-    conec.commit()
-    return (
-        cursor.rowcount,
-        f"row(s) affected. Se ha insertado el resultado de la lista {row['idLista']} Solicitud {row['idSolicitud']}.",
-    )
+    cursor = conec.cursor()
+    try:
+        cursor.execute(query, params)
+        conec.commit()
+        return (
+            cursor.rowcount,
+            f"row(s) affected. Se ha insertado el resultado de la lista {row['idLista']} Solicitud {row['idSolicitud']}.",
+        )
+    except Exception as e:
+        logging.error(f"Error insertando resultado: {e}")
+        return None
+    finally:
+        cursor.close()
+        conec.close()
 
 
-def updEstadoDocs(row):
+def updEstadoSolicitud(row):
+    query = f"""UPDATE T_GH_solicitudInfolaft SET estado = ? WHERE id = ?"""
     params = (row["estado"], row["idSolicitud"])
-    query = "UPDATE T_GH_solicitudInfolaft SET estado = ? where id = ?"
     conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query, params)
-    conec.commit()
-    return (
-        cursor.rowcount,
-        f"row(s) affected. Se actualizo el estado del documento {row['idSolicitud']}.",
-    )
+    cursor = conec.cursor()
+    try:
+        cursor.execute(query, params)
+        conec.commit()
+        return (
+            cursor.rowcount,
+            f"row(s) affected. Se actualizó el estado del documento {row['idSolicitud']}.",
+        )
+    except Exception as e:
+        logging.error(f"Error actualizando estado: {e}")
+        return None
+    finally:
+        cursor.close()
+        conec.close()
 
 
 def updEstadoSolicitudFinalizada(row):
+    query = f"""UPDATE T_GH_solicitudInfolaft SET estado = ?, fechaFinalizacion = GETDATE() WHERE id = ?"""
     params = (row["estado"], row["idSolicitud"])
-    query = "UPDATE T_GH_solicitudInfolaft SET estado = ?, fechaFinalizacion = GETDATE() where id = ?"
     conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query, params)
-    conec.commit()
-    return (
-        cursor.rowcount,
-        f"row(s) affected, se actualizo el estado del documento {row['idSolicitud']}.",
-    )
+    cursor = conec.cursor()
+    try:
+        cursor.execute(query, params)
+        conec.commit()
+        return (
+            cursor.rowcount,
+            f"row(s) affected. Se actualizó el estado del documento {row['idSolicitud']}.",
+        )
+    except Exception as e:
+        logging.error(f"Error actualizando estado finalizado: {e}")
+        return None
+    finally:
+        cursor.close()
+        conec.close()
+
 
 def getConecInfo(params):
-    params = params['idBd']
-    query = "SELECT idBd, bd, srv FROM T_G_appDatabases WITH(NOLOCK) WHERE idBd = ?"
-    conec = con.conSqlAppWeb()
-    cursor = conec.cursor().execute(query, params)
-    columns = [column[0] for column in cursor.description]
-    results = []
-    for row in cursor.fetchall():
-        results.append(dict(zip(columns, row)))
-    return results[0]
+    query = (
+        f"""SELECT idBd, bd, srv FROM T_G_appDatabases WITH(NOLOCK) WHERE idBd = ?"""
+    )
+    params = (params["idBd"],)
+    result = execute_query(query, params)
+    return result[0] if result else None

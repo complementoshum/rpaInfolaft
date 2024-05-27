@@ -1,293 +1,221 @@
-import importlib
+import random
+import time
 import os
 import threading
 import concurrent.futures
 import asyncio
+import importlib
 
 from telegram import Bot
 from dotenv import load_dotenv
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
-
-import tempfile
-import random
-import time
-
 import includes.libs.app as app
 import includes.mstrs.queryMstr as qMstr
 
-
 load_dotenv()  # Evitar sobrescribir variables
-envEstadoV = os.environ.get("ESTADOVALIDANDO")
-envEstadoF = os.environ.get("ESTADOFINALIZADO")
-envAppRPA = os.environ.get("APPRPA")
-envModRPA = os.environ.get("MODRPA")
-envRutaFS = os.environ.get("RUTAFS")
-envRutaDescargas = os.environ.get("RUTAPROYECTO")
-envRetryTime = int(os.environ.get("TIEMPOREINTENTOS"))
-botToken = str(os.environ.get("TELEGRAMBOT"))
-chatIdComp = str(os.environ.get("TELEGRAMID"))
-chatIds = chatIdComp.split(",")
-msgTelegram = "Ocurrió un error general en la ejecución del RPA de infolaft: "
-
-glbRutaS = {"rutaDescargas": envRutaDescargas, "rutaDoc": None}
-
-sem = threading.Semaphore(int(os.environ.get("CANTIDADMAXSOL")))
-bloqueoHilos = threading.Lock()
 
 
-def maxDocumentos():
-    cantidadF = None
-    cantidadSol = None
-    cantidadV = None
-    cantidadSol = int(os.environ.get("CANTIDADMAXSOL"))
-    cantidadV = qMstr.getSolicitudesV()
-    cantidadF = cantidadV[0]["cantidad"]
-    if cantidadF < cantidadSol:
-        return True
+class RPAConfig:
+    def __init__(self):
+        self.estadoV = os.environ.get("ESTADOVALIDANDO")
+        self.estadoF = os.environ.get("ESTADOFINALIZADO")
+        self.appRPA = os.environ.get("APPRPA")
+        self.modRPA = os.environ.get("MODRPA")
+        self.rutaFs = os.environ.get("RUTAFS")
+        self.rutaDescargas = os.environ.get("RUTAPROYECTO")
+        self.retryTime = int(os.environ.get("TIEMPOREINTENTOS"))
+        self.botToken = str(os.environ.get("TELEGRAMBOT"))
+        self.chatIds = str(os.environ.get("TELEGRAMID")).split(",")
+        self.msgTelegram = (
+            "Ocurrió un error general en la ejecución del RPA de infolaft: "
+        )
+        self.maxSolicitudes = int(os.environ.get("CANTIDADMAXSOL"))
+        self.semaphore = threading.Semaphore(self.maxSolicitudes)
+        self.lock = threading.Lock()
 
-    else:
-        return False
 
+class RPAMain:
+    def __init__(self, config):
+        self.config = config
 
-def updEstadoDocumento(idSolicitudP, usrRegistraP, estadoVal, audApp, audMod):
-    usrRegistra = None
-    estadoV = None
-    auditoria = None
-    updDocumento = None
-    updDisponible = None
-    idSolicitud = None
-    updEstadoV = {
-        "estado": None,
-        "idSolicitud": None,
-        "mensajeError": None,
-    }
-    auditoria = {
-        "accion": None,
-        "usr": None,
-        "app": None,
-        "modName": None,
-    }
-    updDisponible = maxDocumentos()
-    if updDisponible:
+    def maxSolicitudes(self):
+        cantidadV = qMstr.getSolicitudesV()
+        cantidadF = cantidadV[0]["cantidad"]
+        return cantidadF < self.config.maxSolicitudes
+
+    def updEstadoSolicitud(self, idSolicitud, estadoSol, mensajeError):
+        estado = None
+        updateFunction = None
+        updFuncionName = None
+        updSolicitud = None
+        updEstado = None
+
+        if estadoSol == self.config.estadoF:
+            estado = self.config.estadoF
+            updFuncionName = "updEstadoSolicitudFinalizada"
+        else:
+            # Si el estado no es 'F', se valida si se puede continuar.
+            if self.maxSolicitudes():
+                estado = self.config.estadoV
+                updFuncionName = "updEstadoSolicitud"
+            else:
+                return None
+
         try:
-            usrRegistra = usrRegistraP
-            idSolicitud = idSolicitudP
-            estadoV = estadoVal
-            appRPA = audApp
-            modRPA = audMod
-            updEstadoV.update(
-                {
-                    "estado": estadoV,
-                    "idSolicitud": idSolicitud,
-                    "mensajeError": None,
-                }
-            )
-            updDocumento = qMstr.updEstadoDocs(updEstadoV)
-            auditoria.update(
-                {
-                    "accion": f"UPD - Estado Solicitud {idSolicitud} - {estadoV}",
-                    "usr": usrRegistra,
-                    "app": appRPA,
-                    "modName": modRPA,
-                }
-            )
-            return updDocumento
+            updEstado = {
+                "estado": estado,
+                "idSolicitud": idSolicitud,
+                "mensajeError": mensajeError,
+            }
 
-        except:
-            return updDocumento
+            updateFunction = getattr(qMstr, updFuncionName)
+            updSolicitud = updateFunction(updEstado)
+            return updSolicitud
+        except AttributeError:
+            print(f"La funcion {updFuncionName} no existe.")
+            return None
+        except Exception as e:
+            print(f"Ocurrio un error al momento de actualizar el estado: {e}")
+            return None
 
-    return updDocumento
+    def procesarLista(self, user, listaRiesgo):
+        perNit = None
+        perIdSolicitud = None
+        idConsecutivo = None
+        idBd = None
+        listId = None
+        listNombre = None
+        listUrl = None
+        listUserLogin = None
+        listPwdLogin = None
+        bdName = None
+        rutaScr = None
+        rutaDoc = None
+        varImportRpa = None
+        infolaft = None
+        rpaDatosDic = {
+            "nit": None,
+            "idSolicitud": None,
+            "idLista": None,
+            "listNombre": None,
+            "urlLista": None,
+            "usuarioLogin": None,
+            "contraseñaLogin": None,
+            "msgNoResultado": None,
+            "rutaDocumento": None,
+            "reintentosEspera": None,
+            "siteCaptchaKey": None,
+        }
 
+        resultE = {
+            "idSolicitud": None,
+            "idLista": None,
+            "urlResultado": None,
+        }
 
-def procesarDocumento(
-    rutaFS,
-    listaRiesgo,
-    user,
-    retryTime,
-    dicRuta,
-):
-    infoLaft = None
-    perIdSolicitud = None
-    perNit = None
-    listId = None
-    listNombre = None
-    listUrl = None
-    listUserLogin = None
-    listPwdLogin = None
-    rutaScr = None
-    idConsecutivoP = None
-    retryTime = None
-    varImportRPA = None
-    idBd = None
-    bdName = None
-    rpaDatosDic = {
-        "nit": None,
-        "idSolicitud": None,
-        "idLista": None,
-        "listNombre": None,
-        "urlLista": None,
-        "usuarioLogin": None,
-        "contraseñaLogin": None,
-        "msgNoResultado": None,
-        "rutaDocumento": None,
-        "reintentosEspera": None,
-        "siteCaptchaKey": None,
-    }
-
-    resultE = {
-        "idSolicitud": None,
-        "idLista": None,
-        "urlResultado": None,
-    }
-
-    paramsBd = {'idBd': None }
-
-    infoLaftReturn = resultE
-    try:
-        with bloqueoHilos:
+        try:
             perNit = user["nit"]
             perIdSolicitud = user["id"]
-            idConsecutivoP = user["idInfolaft"]
-            idBd = user['idBd']
+            idConsecutivo = user["idInfolaft"]
+            idBd = user["idBd"]
             listId = listaRiesgo["idLista"]
             listNombre = listaRiesgo["nombre"]
             listUrl = listaRiesgo["urlLista"]
             listUserLogin = listaRiesgo["userLogin"]
             listPwdLogin = listaRiesgo["passwordLogin"]
-            paramsBd.update({'idBd': idBd})
-            bdName = qMstr.getConecInfo(paramsBd)
-            rutaScr = f"{rutaFS}/{bdName['bd']}/infolaft/{perNit}/{perIdSolicitud}/"
-            retryTime = envRetryTime
+
+            bdName = qMstr.getConecInfo({"idBd": idBd})
+            rutaScr = os.path.join(
+                self.config.rutaFs,
+                bdName["bd"],
+                "infolaft",
+                perNit,
+                str(perIdSolicitud),
+            )
             if not os.path.exists(rutaScr):
                 os.makedirs(rutaScr)
 
-            dicRuta.update({"rutaDoc": rutaScr + str(listId) + "_" + perNit + ".pdf"})
-            varImportRPA = importlib.import_module(f"rpa.{listNombre}")
+            rutaDoc = os.path.join(rutaScr, f"{listId}_{perNit}.pdf")
+            varImportRpa = importlib.import_module(f"rpa.{listNombre}")
             rpaDatosDic.update(
                 {
                     "nit": perNit,
                     "idSolicitud": perIdSolicitud,
-                    "idConsecutivo": idConsecutivoP,
+                    "idConsecutivo": idConsecutivo,
                     "idLista": listId,
                     "listNombre": listNombre,
                     "urlLista": listUrl,
                     "usuarioLogin": listUserLogin,
                     "contraseñaLogin": listPwdLogin,
-                    "rutaDocumento": dicRuta["rutaDoc"],
-                    "rutaDescargas": dicRuta["rutaDescargas"],
-                    "reintentosEspera": retryTime,
+                    "rutaDocumento": rutaDoc,
+                    "rutaDescargas": self.config.rutaDescargas,
+                    "reintentosEspera": self.config.retryTime,
                 }
             )
-        resultE.update({"idSolicitud": perIdSolicitud, "idLista": listId})
-        infoLaft = varImportRPA.WebAutomation(rpaDatosDic)
-        infoLaftReturn = infoLaft.run_rpa(resultE)
-        return infoLaftReturn
-
-    except Exception as e:
-        return infoLaftReturn
-
-
-def procesarSolicitud(user):
-    mensajeError = None
-    idSolicitud = None
-    nit = None
-    result = None
-    usrRegistra = None
-    updSolicitud = None
-    documentoDispo = None
-
-    idSolicitud = user["id"]
-    usrRegistra = user["usrRegistra"]
-
-    documentoDispo = maxDocumentos()
-    if documentoDispo:
-        with sem:
-            with bloqueoHilos:
-                updSolicitud = updEstadoDocumento(
-                    idSolicitud, usrRegistra, envEstadoV, envAppRPA, envModRPA
-                )
-    if updSolicitud:
-        try:
-
-            print(
-                f"---------------Inicia RPA PDF Infolaft #{idSolicitud}--------------"
-            )
-
-            result = qMstr.getListaT()
-            for listaRiesgo in result:
-                idLista = None
-                procesPDF = {
-                    "idSolicitud": None,
-                    "idLista": None,
+            resultE.update(
+                {
+                    "idSolicitud": perIdSolicitud,
+                    "idLista": listId,
                     "urlResultado": None,
                 }
-                nombreLista = None
-
-                idLista = listaRiesgo["idLista"]
-                nombreLista = listaRiesgo["nombre"]
-                with os.scandir(os.environ.get("RUTAPROYECTO") + "rpa") as files:
-                    for file in files:
-                        if str(nombreLista + ".py") == (file.name):
-                            auditoriaUPD = None
-                            # EJECUTA EL ARCHIVO PARA GENERAR EL PDF
-                            procesPDF = procesarDocumento(
-                                envRutaFS,
-                                listaRiesgo,
-                                user,
-                                envRetryTime,
-                                glbRutaS,
-                            )
-
-                            with sem:
-                                with bloqueoHilos:
-                                    infoLaftDocumento = procesPDF["urlResultado"]
-
-                                    if infoLaftDocumento:
-                                        qMstr.insertResultado(procesPDF)
+            )
+            infolaft = varImportRpa.WebAutomation(rpaDatosDic)
+            return infolaft.rpa(resultE)
         except Exception as e:
-            mensajeError = msgTelegram + repr(e)
-            for idChat in chatIds:
+            print(f"Error processing document: {e}")
+            return None
 
-                async def enviar_mensaje(token, chat_id, mensaje):
-                    bot = Bot(token)
-                    await bot.send_message(chat_id=chat_id, text=mensaje)
+    def procesarSolicitud(self, user):
+        mensajeError = None
+        try:
+            idSolicitud = user["id"]
+            if self.maxSolicitudes():
+                with self.config.semaphore:
+                    if self.updEstadoSolicitud(
+                        idSolicitud, self.config.estadoV, mensajeError
+                    ):
+                        print(f"Inicia RPA PDF Infolaft #{idSolicitud}")
 
-                async def main():
-                    token = botToken
-                    chat_id = idChat
-                    await enviar_mensaje(token, chat_id, mensajeError)
+                        listaRiesgo = qMstr.getListaT()
+                        for lista in listaRiesgo:
+                            resultado = self.procesarLista(user, lista)
+                            if resultado and "urlResultado" in resultado:
+                                qMstr.insertResultado(
+                                    {
+                                        "idSolicitud": user["id"],
+                                        "idLista": lista["idLista"],
+                                        "urlResultado": resultado["urlResultado"],
+                                    }
+                                )
+                        print(f"Finaliza RPA PDF Infolaft Solicitud {idSolicitud}")
+                        self.updEstadoSolicitud(
+                            idSolicitud, self.config.estadoF, mensajeError
+                        )
+        except Exception as e:
+            mensajeError = f"{self.config.msgTelegram}{repr(e)}"
+            self.enviarMsgTelegram(mensajeError)
+            self.updEstadoSolicitud(user["id"], self.config.estadoF, mensajeError)
 
-                asyncio.run(main())
+    async def enviarMensaje(self, token, chatId, mensaje):
+        bot = Bot(token)
+        await bot.send_message(chatId=chatId, text=mensaje)
 
-        updEstadoFE = None
-        updEstadoFE = {
-            "estado": envEstadoF,
-            "idSolicitud": idSolicitud,
-            "mensajeError": mensajeError,
-        }
-
-        qMstr.updEstadoSolicitudFinalizada(updEstadoFE)
-        print(
-            f"---------------Finaliza RPA PDF Infolaft Solicitud {idSolicitud}--------------"
-        )
+    def enviarMsgTelegram(self, mensaje):
+        for chatId in self.config.chatIds:
+            asyncio.run(self.enviarMensaje(self.config.botToken, chatId, mensaje))
 
 
 def ejecutarRPA():
-    randomTimeSleep = None
-    userP = None
-    selectDocumentoP = None
-    DocumentoDispo = None
-    DocumentoDispo = maxDocumentos()
-    if DocumentoDispo:
-        selectDocumentoP = {"estado": os.environ.get("ESTADOPENDIENTE")}
-        userP = qMstr.getSolicitud(selectDocumentoP)
+    configRPA = RPAConfig()
+    procesarRPA = RPAMain(configRPA)
+
+    if procesarRPA.maxSolicitudes():
+        solicitudP = {"estado": os.environ.get("ESTADOPENDIENTE")}
+        userP = qMstr.getSolicitud(solicitudP)
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            randomTimeSleep = random.uniform(0, 5)
-            time.sleep(randomTimeSleep)
-            ejecutado = list(executor.map(procesarSolicitud, userP))
+            time.sleep(random.uniform(0, 5))
+            executor.map(procesarRPA.procesarSolicitud, userP)
 
 
-rpaInfolaft = ejecutarRPA()
+if __name__ == "__main__":
+    ejecutarRPA()
