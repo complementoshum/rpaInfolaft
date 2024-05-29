@@ -6,7 +6,7 @@ import logging
 load_dotenv()  # Cargar variables de entorno
 
 
-def execute_query(query, params=None):
+def executeQuery(query, params=None):
     conec = con.conSqlAppWeb()
     cursor = conec.cursor()
     try:
@@ -32,13 +32,13 @@ def getListaT():
         FROM T_RPA_ListasRiesgo WITH(NOLOCK) WHERE esListaRiesgo = ?
         """
     params = (os.environ.get("LISTAINFOLAFT"),)
-    return execute_query(query, params)
+    return executeQuery(query, params)
 
 
 def getEstadoLista(row):
     query = f"""SELECT estado FROM T_RPA_ListasRiesgo WITH(NOLOCK) WHERE idLista = ? """
     params = (row["idLista"],)
-    return execute_query(query, params)
+    return executeQuery(query, params)
 
 
 def getSolicitud(row):
@@ -48,7 +48,7 @@ def getSolicitud(row):
         FROM T_GH_solicitudInfolaft WITH(NOLOCK) WHERE estado = ? AND rutaArchivo IS NULL ORDER BY id ASC
         """
     params = (row["estado"],)
-    return execute_query(query, params)
+    return executeQuery(query, params)
 
 
 def getSolicitudesV():
@@ -57,7 +57,7 @@ def getSolicitudesV():
         FROM T_GH_solicitudInfolaft WITH(NOLOCK) WHERE estado = ?
     """
     params = (os.environ.get("ESTADOVALIDANDO"),)
-    return execute_query(query, params)
+    return executeQuery(query, params)
 
 
 def insertResultado(row):
@@ -125,5 +125,5 @@ def getConecInfo(params):
         f"""SELECT idBd, bd, srv FROM T_G_appDatabases WITH(NOLOCK) WHERE idBd = ?"""
     )
     params = (params["idBd"],)
-    result = execute_query(query, params)
+    result = executeQuery(query, params)
     return result[0] if result else None
