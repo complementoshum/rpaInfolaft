@@ -15,8 +15,8 @@ databaseApp = os.environ.get("DATABASEAPP")
 
 def conSqlAppWeb():
     try:
-        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={databaseApp};UID={userDb};PWD={passwordDb};TrustServerCertificate=yes'
-        connection = py.connect(conn_str)
+        connStr = f'DRIVER={driver};SERVER={server};DATABASE={databaseApp};UID={userDb};PWD={passwordDb};TrustServerCertificate=yes'
+        connection = py.connect(connStr)
         return connection
 
     except Exception as e:

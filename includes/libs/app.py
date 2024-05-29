@@ -21,12 +21,12 @@ logging.basicConfig(
 load_dotenv()  # Cargar variables de entorno
 
 now = datetime.now()
-date_today = now.strftime("%Y-%m-%d %H:%M:%S")
+dateToday = now.strftime("%Y-%m-%d %H:%M:%S")
 
-time_wait_load_page = float(os.getenv("TIEMPOMAXCARGAPAGINA", 10))
-max_retry = int(os.getenv("REINTENTOSCARGAPAGINA", 3))
+timeWaitLoadPage = float(os.getenv("TIEMPOMAXCARGAPAGINA", 10))
+maxRetry = int(os.getenv("REINTENTOSCARGAPAGINA", 3))
 
-bloqueo_hilos = threading.Lock()
+bloqueoHilos = threading.Lock()
 
 
 def driverRPA(driverDic):
@@ -67,28 +67,28 @@ def driverRPA(driverDic):
     return driver
 
 
-def listaActiva(listas_riesgo):
-    estado_lista_con = qMstr.getEstadoLista(listas_riesgo)[0]["estado"]
-    estado_lista_activa = os.getenv("LISTAACTIVA")
+def listaActiva(listasRiesgo):
+    estadoListaCon = qMstr.getEstadoLista(listasRiesgo)[0]["estado"]
+    estadoListaActiva = os.getenv("LISTAACTIVA")
 
-    if str(estado_lista_con) == str(estado_lista_activa):
+    if str(estadoListaCon) == str(estadoListaActiva):
         return True
 
     logging.info("La lista no está 'ACTIVA', la consulta no será realizada.")
     return False
 
 
-def esperaCargaPagina(driver, url, campo_buscar, time_wait_load_page=10, max_retry=3):
-    for intento in range(max_retry):
+def esperaCargaPagina(driver, url, campoBuscar, timeWaitLoadPage=10, maxRetry=3):
+    for intento in range(maxRetry):
         try:
             driver.get(url)
-            WebDriverWait(driver, time_wait_load_page).until(
-                EC.element_to_be_clickable((By.XPATH, campo_buscar))
+            WebDriverWait(driver, timeWaitLoadPage).until(
+                EC.element_to_be_clickable((By.XPATH, campoBuscar))
             )
             return True
         except TimeoutException:
             logging.warning(
-                f"Tiempo de espera excedido al cargar la página. Intento {intento + 1} de {max_retry}"
+                f"Tiempo de espera excedido al cargar la página. Intento {intento + 1} de {maxRetry}"
             )
         except Exception as e:
             logging.error(f"Error al cargar la página: {repr(e)}")
