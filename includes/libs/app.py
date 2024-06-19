@@ -32,7 +32,7 @@ bloqueoHilos = threading.Lock()
 def driverRPA(driverDic):
     options = Options()
     options.add_argument("--no-sandbox")
-    options.add_argument('--headless=new')
+    options.add_argument("--headless=new")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--start-fullscreen")
@@ -94,6 +94,36 @@ def driverRPA(driverDic):
     return driver
 
 
+def listaActiva(listasRiesgo):
+    estadoListaCon = qMstr.getEstadoLista(listasRiesgo)[0]["estado"]
+    estadoListaActiva = os.getenv("LISTAACTIVA")
+
+    if str(estadoListaCon) == str(estadoListaActiva):
+        return True
+
+    logging.info("La lista no está 'ACTIVA', la consulta no será realizada.")
+    return False
+
+
+def esperaCargaPagina(driver, url, campoBuscar, timeWaitLoadPage=10, maxRetry=3):
+    for intento in range(maxRetry):
+        try:
+            driver.get(url)
+            WebDriverWait(driver, timeWaitLoadPage).until(
+                EC.element_to_be_clickable((By.XPATH, campoBuscar))
+            )
+            return True
+        except TimeoutException:
+            logging.warning(
+                f"Tiempo de espera excedido al cargar la página. Intento {intento + 1} de {maxRetry}"
+            )
+        except Exception as e:
+            logging.error(f"Error al cargar la página: {repr(e)}")
+            return False
+    logging.error("Se alcanzó el número máximo de intentos")
+    return False
+
+
 def removeFileIfExist(ruta):
     try:
         if os.path.exists(ruta):
@@ -103,4 +133,3 @@ def removeFileIfExist(ruta):
     except Exception as e:
         logging.error(f"Error al eliminar el archivo: {repr(e)}")
         return False
-
