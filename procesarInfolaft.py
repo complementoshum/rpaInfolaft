@@ -5,6 +5,7 @@ import threading
 import concurrent.futures
 import asyncio
 import importlib
+import logging
 
 from telegram import Bot
 from dotenv import load_dotenv
@@ -14,6 +15,14 @@ import includes.mstrs.queryMstr as qMstr
 
 load_dotenv()  # Evitar sobrescribir variables
 
+# Configura el logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M'
+)
+
+logger = logging.getLogger(__name__)
 
 class RPAConfig:
     def __init__(self):
@@ -72,10 +81,11 @@ class RPAMain:
             updSolicitud = updateFunction(updEstado)
             return updSolicitud
         except AttributeError:
-            print(f"La funcion {updFuncionName} no existe.")
+            logging.critical(f"La funcion {updFuncionName} no existe.")
             return None
+
         except Exception as e:
-            print(f"Ocurrio un error al momento de actualizar el estado: {e}")
+            logging.error(f"Ocurrio un error al momento de actualizar el estado: {e}")
             return None
 
     def procesarLista(self, user, listaRiesgo):
@@ -123,8 +133,8 @@ class RPAMain:
             listUrl = listaRiesgo["urlLista"]
             listUserLogin = listaRiesgo["userLogin"]
             listPwdLogin = listaRiesgo["passwordLogin"]
-
             bdName = qMstr.getConecInfo({"idBd": idBd})
+
             rutaScr = os.path.join(
                 self.config.rutaFs,
                 bdName["bd"],
@@ -137,6 +147,7 @@ class RPAMain:
 
             rutaDoc = os.path.join(rutaScr, f"{listId}_{perNit}.pdf")
             varImportRpa = importlib.import_module(f"rpa.{listNombre}")
+
             rpaDatosDic.update(
                 {
                     "nit": perNit,
@@ -159,10 +170,12 @@ class RPAMain:
                     "urlResultado": None,
                 }
             )
+
             infolaft = varImportRpa.WebAutomation(rpaDatosDic)
             return infolaft.rpa(resultE)
+
         except Exception as e:
-            print(f"Error processing document: {e}")
+            logging.error(f"Error procesando la solicitud: {e}")
             return None
 
     def procesarSolicitud(self, user):
@@ -174,9 +187,10 @@ class RPAMain:
                     if self.updEstadoSolicitud(
                         idSolicitud, self.config.estadoV, mensajeError
                     ):
-                        print(f"Inicia RPA PDF Infolaft #{idSolicitud}")
+                        logging.info(f"Inicia RPA PDF Infolaft #{idSolicitud}")
 
                         listaRiesgo = qMstr.getListaT()
+
                         for lista in listaRiesgo:
                             resultado = self.procesarLista(user, lista)
                             if resultado and "urlResultado" in resultado:
@@ -187,7 +201,7 @@ class RPAMain:
                                         "urlResultado": resultado["urlResultado"],
                                     }
                                 )
-                        print(f"Finaliza RPA PDF Infolaft Solicitud {idSolicitud}")
+                        logging.info(f"Finaliza RPA PDF Infolaft Solicitud {idSolicitud}")
                         self.updEstadoSolicitud(
                             idSolicitud, self.config.estadoF, mensajeError
                         )
@@ -212,6 +226,7 @@ def ejecutarRPA():
     if procesarRPA.maxSolicitudes():
         solicitudP = {"estado": os.environ.get("ESTADOPENDIENTE")}
         userP = qMstr.getSolicitud(solicitudP)
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             time.sleep(random.uniform(0, 5))
             executor.map(procesarRPA.procesarSolicitud, userP)

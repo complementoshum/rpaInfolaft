@@ -3,11 +3,20 @@ import shutil
 import tempfile
 import time
 import glob
+import logging
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 import includes.libs.app as app
 
+# Configura el logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M'
+)
+
+logger = logging.getLogger(__name__)
 
 # Constants
 XPATHS = {
@@ -57,7 +66,7 @@ class WebAutomation:
             return True
 
         except Exception as e:
-            print(f"Error login, intento: {intentos} | {repr(e)}")
+            logging.error(f"Error login, intento: {intentos} | {repr(e)}")
             time.sleep(10)
             if intentos < 6:
                 return self.login(usuario, contraseña, intentos + 1)
@@ -112,7 +121,7 @@ class WebAutomation:
         return False
 
     def reiniciarRPA(self, e, resultE, contNoti, retryTime):
-        print(
+        logging.warning(
             f"Reintentando solicitud {self.paramsCons['idSolicitud']} intento {contNoti + 1} Error: {repr(e)}"
         )
         try:

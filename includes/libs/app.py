@@ -13,12 +13,17 @@ from datetime import datetime
 import threading
 import includes.mstrs.queryMstr as qMstr
 
-# Configuración de logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 load_dotenv()  # Cargar variables de entorno
+
+# Configura el logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M'
+)
+
+logger = logging.getLogger(__name__)
 
 now = datetime.now()
 dateToday = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -120,7 +125,8 @@ def esperaCargaPagina(driver, url, campoBuscar, timeWaitLoadPage=10, maxRetry=3)
         except Exception as e:
             logging.error(f"Error al cargar la página: {repr(e)}")
             return False
-    logging.error("Se alcanzó el número máximo de intentos")
+
+    logging.info("Se alcanzó el número máximo de intentos")
     return False
 
 
@@ -129,7 +135,9 @@ def removeFileIfExist(ruta):
         if os.path.exists(ruta):
             os.remove(ruta)
             return True
+
         return False
+
     except Exception as e:
         logging.error(f"Error al eliminar el archivo: {repr(e)}")
         return False

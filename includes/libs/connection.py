@@ -1,10 +1,20 @@
 import os
 import time
+import logging
 
 import pyodbc as py
 from dotenv import load_dotenv
 
 load_dotenv()  # Evitar sobrescribir variables
+
+# Configura el logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M'
+)
+
+logger = logging.getLogger(__name__)
 
 driver = os.environ.get("DRIVER")
 server = os.environ.get("SERVER")
@@ -20,6 +30,6 @@ def conSqlAppWeb():
         return connection
 
     except Exception as e:
-        print(repr(e))
+        logger.warning(f"Error en la conexión: {repr(e)}")
         time.sleep(30)
         return conSqlAppWeb()
