@@ -109,9 +109,9 @@ class WebAutomation:
         )
         waitBtnBusquedaDescPDF.click()
 
-    def moveFile(self, rutaDescargas, rutaF, nit, intentosPDF):
+    def moveFile(self, rutaDescargas, rutaF, idConsecutivo, intentosPDF):
         while intentosPDF < 10:
-            files = glob.glob(os.path.join(rutaDescargas, f"*{nit}*"))
+            files = glob.glob(os.path.join(rutaDescargas, f"*{idConsecutivo}*"))
             if files:
                 latestFile = max(files, key=os.path.getctime)
                 shutil.move(latestFile, os.path.join(rutaF))
@@ -165,7 +165,7 @@ class WebAutomation:
                 if self.moveFile(
                     self.paramsCons["rutaDescargas"],
                     self.paramsCons["rutaDocumento"],
-                    self.paramsCons["nit"],
+                    self.paramsCons["idConsecutivo"],
                     intentosPDF,
                 ):
                     resultE.update({"urlResultado": self.paramsCons["rutaDocumento"]})
